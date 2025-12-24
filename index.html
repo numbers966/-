@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>كاشف الأرقام الذكي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
+
+        :root {
+            --ios-bg: #f2f2f7;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --snap-yellow: #FFFC00;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* iPhone Frame Simulation */
+        .iphone-x {
+            position: relative;
+            width: 375px;
+            height: 812px;
+            background: var(--ios-bg);
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 8px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #333;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+
+        .screen-content {
+            flex: 1;
+            padding: 20px;
+            margin-top: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ios-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+
+        .ios-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: #007AFF;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .ios-btn:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            background: #FFFC00;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 10px;
+            font-size: 40px;
+            color: black;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .hidden { display: none; }
+
+        .admin-list-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        /* Toast Message */
+        #toast {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            opacity: 0;
+            transition: 0.5s;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="iphone-x">
+    <div class="notch"></div>
+    
+    <!-- Toast notification -->
+    <div id="toast"></div>
+
+    <div class="screen-content">
+        
+        <!-- 1. LOGIN SCREEN -->
+        <div id="login-page" class="flex flex-col items-center justify-center h-full">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <i class="fas fa-search-location"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">كاشف الأرقام</h1>
+                <p class="text-gray-500 text-sm">أهلاً بك في النسخة المطورة</p>
+            </div>
+
+            <div class="glass-card w-full">
+                <h2 class="text-center mb-4 font-bold text-gray-700">مرحباً بك</h2>
+                <input type="text" id="telegram-id" class="ios-input" placeholder="يرجى إدخال آيدي التيليجرام">
+                <button onclick="handleLogin()" class="ios-btn" style="background: #FFFC00; color: black;">دخول</button>
+            </div>
+        </div>
+
+        <!-- 2. HOME PAGE (SEARCH) -->
+        <div id="home-page" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-xl font-bold text-gray-800">البحث الذكي</h1>
+                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600"></i>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <p class="text-sm text-gray-600 mb-4 text-center">أدخل اليوزر أو الآيدي الذي تريد كشف رقمه</p>
+                <input type="text" id="search-query" class="ios-input" placeholder="@username / ID">
+                <button onclick="handleSearch()" class="ios-btn">كشف الرقم الآن</button>
+            </div>
+
+            <div class="mt-4 p-4 border-2 border-dashed border-gray-300 rounded-2xl text-center text-gray-400">
+                <i class="fas fa-shield-alt text-3xl mb-2"></i>
+                <p class="text-xs">نحن نستخدم تقنيات التشفير المتقدمة للوصول إلى البيانات</p>
+            </div>
+        </div>
+
+        <!-- 3. ADMIN PANEL -->
+        <div id="admin-page" class="hidden h-full flex flex-col">
+            <div class="flex items-center mb-6">
+                <button onclick="exitAdmin()" class="ml-4 text-gray-600"><i class="fas fa-chevron-right"></i></button>
+                <h1 class="text-xl font-bold text-gray-800">لوحة التحكم (الإدارة)</h1>
+            </div>
+
+            <div class="glass-card flex-1 overflow-hidden flex flex-col">
+                <h3 class="font-bold text-gray-700 mb-3 border-bottom pb-2">قائمة المستخدمين المسجلين</h3>
+                <div id="users-list" class="overflow-y-auto flex-1 pr-2">
+                    <!-- Users will appear here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Local storage for users (persists in session)
+    let usersList = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+    const ADMIN_KEY = "44444444444444";
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.innerText = message;
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+    }
+
+    function handleLogin() {
+        const idInput = document.getElementById('telegram-id').value.trim();
+        
+        if (!idInput) {
+            showToast("يرجى إدخال الآيدي أولاً");
+            return;
+        }
+
+        // Check if it's admin
+        if (idInput === ADMIN_KEY) {
+            openAdmin();
+            return;
+        }
+
+        // Save User
+        usersList.push({
+            id: idInput,
+            time: new Date().toLocaleTimeString('ar-EG')
+        });
+        localStorage.setItem('registeredUsers', JSON.stringify(usersList));
+
+        // Switch to Home Page
+        document.getElementById('login-page').classList.add('hidden');
+        document.getElementById('home-page').classList.remove('hidden');
+        showToast("تم الدخول بنجاح");
+    }
+
+    function handleSearch() {
+        const query = document.getElementById('search-query').value.trim();
+        if (!query) {
+            showToast("يرجى إدخال البيانات");
+            return;
+        }
+        
+        // Error Message as requested
+        showToast("الموقع حالياً معلق، حاول لاحقاً");
+    }
+
+    function openAdmin() {
+        const listContainer = document.getElementById('users-list');
+        listContainer.innerHTML = '';
+        
+        if (usersList.length === 0) {
+            listContainer.innerHTML = '<p class="text-center text-gray-400 mt-10">لا يوجد مستخدمين حالياً</p>';
+        } else {
+            usersList.forEach((user, index) => {
+                const div = document.createElement('div');
+                div.className = 'admin-list-item shadow-sm';
+                div.innerHTML = `
+                    <span class="font-bold text-blue-600">${user.id}</span>
+                    <span class="text-xs text-gray-400">${user.time}</span>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        document.getElementById('login-page').classList.add('hidden');
+        document.getElementById('home-page').classList.add('hidden');
+        document.getElementById('admin-page').classList.remove('hidden');
+    }
+
+    function exitAdmin() {
+        document.getElementById('admin-page').classList.add('hidden');
+        document.getElementById('login-page').classList.remove('hidden');
+        document.getElementById('telegram-id').value = '';
+    }
+</script>
+
+</body>
+</html>
+
